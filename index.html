@@ -15,6 +15,8 @@
             --light: #f8f9fa;
             --gray: #6c757d;
             --border: #e0e0e0;
+            --error: #dc3545;
+            --success: #28a745;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
@@ -224,23 +226,28 @@
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
+            position: relative;
         }
 
         label {
             font-weight: 600;
             color: var(--dark);
             font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
         }
 
         .required::after {
             content: ' *';
-            color: #dc3545;
+            color: var(--error);
         }
 
         input[type="text"],
         input[type="email"],
         input[type="number"],
         input[type="date"],
+        input[type="file"],
         select,
         textarea {
             padding: 0.75rem 1rem;
@@ -250,6 +257,7 @@
             font-size: 0.95rem;
             transition: all 0.3s ease;
             background: white;
+            width: 100%;
         }
 
         input:focus,
@@ -260,9 +268,54 @@
             box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.1);
         }
 
+        input.error,
+        select.error,
+        textarea.error {
+            border-color: var(--error);
+            background-color: rgba(220, 53, 69, 0.02);
+        }
+
+        input.valid,
+        select.valid,
+        textarea.valid {
+            border-color: var(--success);
+        }
+
         textarea {
             resize: vertical;
             min-height: 120px;
+        }
+
+        .error-message {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .error-message.show {
+            display: flex;
+        }
+
+        .error-icon {
+            width: 16px;
+            height: 16px;
+            background: var(--error);
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .validation-hint {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
         }
 
         .job-family-grid {
@@ -309,6 +362,11 @@
             transform: scaleY(1);
         }
 
+        .job-family-card.error {
+            border-color: var(--error);
+            background: rgba(220, 53, 69, 0.05);
+        }
+
         .job-family-card h4 {
             color: var(--primary);
             margin-bottom: 0.5rem;
@@ -342,6 +400,7 @@
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
+            vertical-align: top;
         }
 
         .rating-table th {
@@ -411,12 +470,18 @@
             display: grid;
             grid-template-columns: 1fr 120px;
             gap: 1rem;
-            align-items: center;
+            align-items: start;
             margin-bottom: 1rem;
             padding: 1rem;
             background: #f8f9fa;
             border-radius: 8px;
             border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .task-row.error {
+            border-color: var(--error);
+            background: rgba(220, 53, 69, 0.05);
         }
 
         .percentage-input {
@@ -436,6 +501,7 @@
             transform: translateY(-50%);
             color: var(--gray);
             font-weight: 600;
+            pointer-events: none;
         }
 
         .btn-group {
@@ -461,13 +527,18 @@
             gap: 0.5rem;
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
             box-shadow: 0 4px 6px -1px rgba(13, 92, 92, 0.2);
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 15px -3px rgba(13, 92, 92, 0.3);
         }
@@ -478,13 +549,13 @@
             border: 2px solid var(--primary);
         }
 
-        .btn-secondary:hover {
+        .btn-secondary:hover:not(:disabled) {
             background: var(--primary);
             color: white;
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+            background: linear-gradient(135deg, var(--success) 0%, #34ce57 100%);
             color: white;
         }
 
@@ -500,31 +571,6 @@
             color: var(--primary);
             margin-bottom: 1rem;
             font-size: 1.1rem;
-        }
-
-        .autonomy-levels {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin: 1rem 0;
-        }
-
-        .autonomy-option {
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .autonomy-option:hover {
-            border-color: var(--secondary);
-        }
-
-        .autonomy-option.selected {
-            border-color: var(--primary);
-            background: rgba(13, 92, 92, 0.05);
         }
 
         .decision-types {
@@ -593,64 +639,184 @@
             background: var(--primary);
         }
 
-        .preview-modal {
+        /* File Upload Styling */
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            color: var(--gray);
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--secondary);
+            background: rgba(201, 169, 98, 0.05);
+        }
+
+        .file-upload-label.has-file {
+            border-color: var(--success);
+            background: rgba(40, 167, 69, 0.05);
+            color: var(--success);
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Work Guides Checkboxes */
+        .work-guide-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .work-guide-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+        }
+
+        .work-guide-item label {
+            margin: 0;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Success Modal Styles */
+        .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
             z-index: 1000;
-            overflow-y: auto;
+            animation: fadeIn 0.3s ease;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
         }
 
-        .preview-content {
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .success-modal {
             background: white;
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 3rem;
-            border-radius: 16px;
-            position: relative;
-        }
-
-        .close-preview {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--gray);
-        }
-
-        .preview-document {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.8;
-        }
-
-        .preview-header {
+            border-radius: 24px;
+            padding: 4rem;
+            max-width: 600px;
+            width: 100%;
             text-align: center;
-            border-bottom: 3px double var(--primary);
-            padding-bottom: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: scaleIn 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .success-modal::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-icon-large {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--success) 0%, #34ce57 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+            animation: pulse 2s ease-in-out infinite;
+            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .success-icon-large svg {
+            width: 60px;
+            height: 60px;
+            color: white;
+        }
+
+        .success-modal h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .success-modal .message {
+            color: var(--gray);
+            font-size: 1.2rem;
+            line-height: 1.6;
             margin-bottom: 2rem;
         }
 
-        .success-message {
-            display: none;
-            background: linear-gradient(135deg, #28a745 0%, #34ce57 100%);
+        .success-modal .close-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
             color: white;
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 2rem;
-            animation: slideIn 0.5s ease;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+        .success-modal .close-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
         .confidentiality-notice {
@@ -661,6 +827,70 @@
             border-radius: 8px;
             margin-bottom: 2rem;
             font-size: 0.9rem;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 80px;
+            height: 80px;
+            border: 6px solid var(--border);
+            border-top-color: var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .section-error-banner {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-error-banner.show {
+            display: flex;
+        }
+
+        .job-specific-input {
+            width: 100%;
+            min-height: 60px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        .job-specific-input:focus {
+            outline: none;
+            border-color: var(--secondary);
         }
 
         @media (max-width: 768px) {
@@ -685,26 +915,23 @@
                 font-size: 0.75rem;
                 white-space: nowrap;
             }
-        }
 
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 2rem;
-        }
+            .success-modal {
+                padding: 2.5rem;
+            }
 
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--border);
-            border-top-color: var(--secondary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
+            .success-modal h2 {
+                font-size: 1.8rem;
+            }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            .rating-table {
+                font-size: 0.85rem;
+            }
+
+            .rating-table th,
+            .rating-table td {
+                padding: 0.75rem 0.5rem;
+            }
         }
     </style>
 </head>
@@ -723,131 +950,171 @@
 
     <div class="container">
         <div class="confidentiality-notice">
-            <strong>Confidentiality Assurance:</strong> All information provided will be treated with the utmost confidentiality. Responses will be used solely for developing job descriptions and shared only with authorized personnel involved in the process.
+            <strong>🔒 Confidentiality Assurance:</strong> All information provided will be treated with the utmost confidentiality. Responses will be used solely for developing job descriptions and shared only with authorized personnel involved in the process.
         </div>
 
         <div class="progress-bar">
             <div class="progress-steps">
-                <div class="step active" onclick="goToSection(0)">
+                <div class="step active" data-step="0">
                     <div class="step-number">1</div>
                     <div class="step-label">Basic Info</div>
                 </div>
-                <div class="step" onclick="goToSection(1)">
+                <div class="step" data-step="1">
                     <div class="step-number">2</div>
                     <div class="step-label">Job Family</div>
                 </div>
-                <div class="step" onclick="goToSection(2)">
+                <div class="step" data-step="2">
                     <div class="step-number">3</div>
-                    <div class="step-label">Core Responsibilities</div>
+                    <div class="step-label">Responsibilities</div>
                 </div>
-                <div class="step" onclick="goToSection(3)">
+                <div class="step" data-step="3">
                     <div class="step-number">4</div>
                     <div class="step-label">Requirements</div>
                 </div>
-                <div class="step" onclick="goToSection(4)">
+                <div class="step" data-step="4">
                     <div class="step-number">5</div>
-                    <div class="step-label">Skills & Traits</div>
+                    <div class="step-label">Skills</div>
                 </div>
-                <div class="step" onclick="goToSection(5)">
+                <div class="step" data-step="5">
                     <div class="step-number">6</div>
                     <div class="step-label">Performance</div>
                 </div>
-                <div class="step" onclick="goToSection(6)">
+                <div class="step" data-step="6">
                     <div class="step-number">7</div>
-                    <div class="step-label">Review & Submit</div>
+                    <div class="step-label">Review</div>
                 </div>
             </div>
         </div>
 
-        <form id="jobAnalysisForm">
+        <form id="jobAnalysisForm" novalidate>
             <!-- Section 1: Basic Information -->
-            <div class="form-section active" id="section-0">
+            <div class="form-section active" id="section-0" data-section="0">
                 <div class="section-header">
                     <h2>Quick Start Information</h2>
                     <p>Who fills this? You (Team Lead/Head of Function) for each direct report. Time required: 30-45 minutes.</p>
                 </div>
 
+                <div class="section-error-banner" id="error-banner-0">
+                    <span class="error-icon">!</span>
+                    <span>Please fill in all required fields correctly before proceeding.</span>
+                </div>
+
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="required">Your Name (Team Lead)</label>
-                        <input type="text" name="teamLeadName" required placeholder="Enter your full name">
+                        <label class="required" for="teamLeadName">Your Name (Team Lead)</label>
+                        <input type="text" id="teamLeadName" name="teamLeadName" required 
+                               placeholder="Enter your full name" 
+                               minlength="2" maxlength="100"
+                               pattern="[A-Za-z\s\-'.]+"
+                               data-error="Please enter a valid name (letters only)">
+                        <span class="error-message" id="error-teamLeadName">
+                            <span class="error-icon">!</span>
+                            <span class="error-text">Your name is required</span>
+                        </span>
                     </div>
                     <div class="form-group">
-                        <label class="required">Your Email</label>
-                        <input type="email" name="teamLeadEmail" required placeholder="your.email@company.com">
+                        <label class="required" for="teamLeadEmail">Your Email</label>
+                        <input type="email" id="teamLeadEmail" name="teamLeadEmail" required 
+                               placeholder="your.email@company.com"
+                               pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+                               data-error="Please enter a valid email address">
+                        <span class="error-message" id="error-teamLeadEmail">
+                            <span class="error-icon">!</span>
+                            <span class="error-text">Valid email is required</span>
+                        </span>
                     </div>
                     <div class="form-group">
-                        <label class="required">Subordinate Name</label>
-                        <input type="text" name="subordinateName" required placeholder="Employee being analyzed">
+                        <label class="required" for="jobTitle">Job Title</label>
+                        <input type="text" id="jobTitle" name="jobTitle" required 
+                               placeholder="e.g., Senior Risk Analyst"
+                               minlength="2" maxlength="100"
+                               data-error="Job title is required">
+                        <span class="error-message" id="error-jobTitle">
+                            <span class="error-icon">!</span>
+                            <span class="error-text">Job title is required</span>
+                        </span>
                     </div>
                     <div class="form-group">
-                        <label class="required">Job Title</label>
-                        <input type="text" name="jobTitle" required placeholder="e.g., Senior Risk Analyst">
+                        <label class="required" for="department">Department/Function</label>
+                        <input type="text" id="department" name="department" required 
+                               placeholder="e.g., Risk & Compliance"
+                               minlength="2" maxlength="100"
+                               data-error="Department is required">
+                        <span class="error-message" id="error-department">
+                            <span class="error-icon">!</span>
+                            <span class="error-text">Department is required</span>
+                        </span>
                     </div>
                     <div class="form-group">
-                        <label class="required">Department/Function</label>
-                        <input type="text" name="department" required placeholder="e.g., Risk & Compliance">
-                    </div>
-                    <div class="form-group">
-                        <label class="required">Date</label>
-                        <input type="date" name="analysisDate" required>
+                        <label class="required" for="analysisDate">Date</label>
+                        <input type="date" id="analysisDate" name="analysisDate" required
+                               data-error="Please select a date">
+                        <span class="error-message" id="error-analysisDate">
+                            <span class="error-icon">!</span>
+                            <span class="error-text">Date is required</span>
+                        </span>
                     </div>
                 </div>
 
                 <div class="btn-group">
                     <div></div>
-                    <button type="button" class="btn btn-primary" onclick="nextSection()">
+                    <button type="button" class="btn btn-primary" onclick="validateAndProceed(0)">
                         Next: Job Family →
                     </button>
                 </div>
             </div>
 
             <!-- Section 2: Job Family Selection -->
-            <div class="form-section" id="section-1">
+            <div class="form-section" id="section-1" data-section="1">
                 <div class="section-header">
                     <h2>Job Family Framework</h2>
                     <p>Select the best match for this job. This guides the competency ratings throughout the form.</p>
                 </div>
 
+                <div class="section-error-banner" id="error-banner-1">
+                    <span class="error-icon">!</span>
+                    <span>Please select a job family or specify a custom one.</span>
+                </div>
+
                 <input type="hidden" name="selectedJobFamily" id="selectedJobFamily" required>
 
-                <div class="job-family-grid">
-                    <div class="job-family-card" onclick="selectJobFamily('tech', this)">
+                <div class="job-family-grid" id="jobFamilyGrid">
+                    <div class="job-family-card" data-family="tech" onclick="selectJobFamily('tech', this)">
                         <h4>🏗️ Tech & Engineering</h4>
                         <p>Building and maintaining technology infrastructure, systems, and platforms.</p>
                         <div class="examples">Examples: Software Dev, Data Engineer, DevOps, Security</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('product', this)">
+                    <div class="job-family-card" data-family="product" onclick="selectJobFamily('product', this)">
                         <h4>🎨 Product & Design</h4>
                         <p>Defining product vision, user experience, and feature development.</p>
                         <div class="examples">Examples: Product Manager, UX Designer, UI Developer</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('risk', this)">
+                    <div class="job-family-card" data-family="risk" onclick="selectJobFamily('risk', this)">
                         <h4>🛡️ Risk & Compliance</h4>
                         <p>Ensuring regulatory adherence, fraud prevention, and risk management.</p>
                         <div class="examples">Examples: Risk Analyst, Compliance Officer, AML Specialist</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('operations', this)">
+                    <div class="job-family-card" data-family="operations" onclick="selectJobFamily('operations', this)">
                         <h4>⚙️ Operations</h4>
                         <p>Managing daily processes, transactions, and customer interactions.</p>
                         <div class="examples">Examples: Payments Ops, Customer Support, Back Office</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('finance', this)">
+                    <div class="job-family-card" data-family="finance" onclick="selectJobFamily('finance', this)">
                         <h4>📊 Finance & Strategy</h4>
                         <p>Financial planning, analysis, and strategic business initiatives.</p>
                         <div class="examples">Examples: FP&A, Business Analyst, Treasury, Accounting</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('growth', this)">
+                    <div class="job-family-card" data-family="growth" onclick="selectJobFamily('growth', this)">
                         <h4>🚀 Growth & Commercial</h4>
                         <p>Customer acquisition, revenue generation, and market expansion.</p>
                         <div class="examples">Examples: BD Manager, Growth Marketer, Sales, Partnerships</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('people', this)">
+                    <div class="job-family-card" data-family="people" onclick="selectJobFamily('people', this)">
                         <h4>👥 People & Culture</h4>
                         <p>Talent management, organizational development, and culture.</p>
                         <div class="examples">Examples: HR Business Partner, Talent Acquisition, L&D</div>
                     </div>
-                    <div class="job-family-card" onclick="selectJobFamily('legal', this)">
+                    <div class="job-family-card" data-family="legal" onclick="selectJobFamily('legal', this)">
                         <h4>⚖️ Legal & Governance</h4>
                         <p>Legal counsel, contract management, and corporate governance.</p>
                         <div class="examples">Examples: Legal Counsel, Company Secretary, Paralegal</div>
@@ -855,96 +1122,169 @@
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">
-                    <label>Other (Specify if not listed above)</label>
-                    <input type="text" name="jobFamilyOther" placeholder="Custom job family description">
+                    <label for="jobFamilyOther">Other (Specify if not listed above)</label>
+                    <input type="text" id="jobFamilyOther" name="jobFamilyOther" 
+                           placeholder="Custom job family description"
+                           oninput="clearJobFamilyError()">
+                    <span class="validation-hint">Only fill this if you selected "Other" or none of the above fit</span>
                 </div>
 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevSection()">← Back</button>
-                    <button type="button" class="btn btn-primary" onclick="nextSection()">Next: Core Responsibilities →</button>
+                    <button type="button" class="btn btn-primary" onclick="validateAndProceed(1)">Next: Responsibilities →</button>
                 </div>
             </div>
 
             <!-- Section 3: Core Responsibilities -->
-            <div class="form-section" id="section-2">
+            <div class="form-section" id="section-2" data-section="2">
                 <div class="section-header">
                     <h2>Section 1: Job Basics</h2>
                     <p>Define the fundamental purpose and key activities of this role.</p>
                 </div>
 
+                <div class="section-error-banner" id="error-banner-2">
+                    <span class="error-icon">!</span>
+                    <span>Please complete all required fields. Task percentages must total 100%.</span>
+                </div>
+
                 <div class="form-group" style="margin-bottom: 2rem;">
-                    <label class="required">Main Job Goal (1-2 sentences)</label>
+                    <label class="required" for="jobGoal">Main Job Goal (1-2 sentences)</label>
                     <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">What does this person do every day? What is their primary purpose?</p>
-                    <textarea name="jobGoal" required placeholder="e.g., Ensure all payment transactions comply with CBN regulations while maintaining 99.9% processing uptime..."></textarea>
+                    <textarea id="jobGoal" name="jobGoal" required 
+                              placeholder="e.g., Ensure all payment transactions comply with CBN regulations while maintaining 99.9% processing uptime..."
+                              minlength="10" maxlength="500"
+                              data-error="Please describe the job goal (10-500 characters)"></textarea>
+                    <span class="error-message" id="error-jobGoal">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Job goal is required (minimum 10 characters)</span>
+                    </span>
                 </div>
 
                 <div class="form-group">
                     <label class="required">Top 5 Tasks (with % time allocation)</label>
-                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 1rem;">List the most important tasks and estimate time spent. Total should equal 100%.</p>
+                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 1rem;">List the most important tasks. First 3 are required. Total must equal 100%.</p>
                     
                     <div id="taskContainer">
-                        <div class="task-row">
-                            <input type="text" name="task1" placeholder="Task description" required>
-                            <div class="percentage-input">
-                                <input type="number" name="task1Percent" min="0" max="100" required onchange="validatePercentage()">
+                        <div class="task-row" data-task="1">
+                            <div class="form-group" style="margin: 0;">
+                                <input type="text" id="task1" name="task1" placeholder="Task 1 description" required
+                                       data-error="Task 1 description is required">
+                                <span class="error-message" id="error-task1" style="margin-top: 0.25rem;">
+                                    <span class="error-icon">!</span>
+                                    <span class="error-text">Required</span>
+                                </span>
+                            </div>
+                            <div class="form-group percentage-input" style="margin: 0;">
+                                <input type="number" id="task1Percent" name="task1Percent" min="0" max="100" required 
+                                       placeholder="%" onchange="validatePercentage()" oninput="validatePercentage()"
+                                       data-error="Percentage required">
+                                <span class="error-message" id="error-task1Percent" style="margin-top: 0.25rem;">
+                                    <span class="error-icon">!</span>
+                                    <span class="error-text">Required</span>
+                                </span>
                             </div>
                         </div>
-                        <div class="task-row">
-                            <input type="text" name="task2" placeholder="Task description" required>
-                            <div class="percentage-input">
-                                <input type="number" name="task2Percent" min="0" max="100" required onchange="validatePercentage()">
+                        <div class="task-row" data-task="2">
+                            <div class="form-group" style="margin: 0;">
+                                <input type="text" id="task2" name="task2" placeholder="Task 2 description" required
+                                       data-error="Task 2 description is required">
+                                <span class="error-message" id="error-task2" style="margin-top: 0.25rem;">
+                                    <span class="error-icon">!</span>
+                                    <span class="error-text">Required</span>
+                                </span>
+                            </div>
+                            <div class="form-group percentage-input" style="margin: 0;">
+                                <input type="number" id="task2Percent" name="task2Percent" min="0" max="100" required 
+                                       placeholder="%" onchange="validatePercentage()" oninput="validatePercentage()"
+                                       data-error="Percentage required">
+                                <span class="error-message" id="error-task2Percent" style="margin-top: 0.25rem;">
+                                    <span class="error-icon">!</span>
+                                    <span class="error-text">Required</span>
+                                </span>
                             </div>
                         </div>
-                        <div class="task-row">
-                            <input type="text" name="task3" placeholder="Task description" required>
-                            <div class="percentage-input">
-                                <input type="number" name="task3Percent" min="0" max="100" required onchange="validatePercentage()">
+                        <div class="task-row" data-task="3">
+                            <div class="form-group" style="margin: 0;">
+                                <input type="text" id="task3" name="task3" placeholder="Task 3 description" required
+                                       data-error="Task 3 description is required">
+                                <span class="error-message" id="error-task3" style="margin-top: 0.25rem;">
+                                    <span class="error-icon">!</span>
+                                    <span class="error-text">Required</span>
+                                </span>
+                            </div>
+                            <div class="form-group percentage-input" style="margin: 0;">
+                                <input type="number" id="task3Percent" name="task3Percent" min="0" max="100" required 
+                                       placeholder="%" onchange="validatePercentage()" oninput="validatePercentage()"
+                                       data-error="Percentage required">
+                                <span class="error-message" id="error-task3Percent" style="margin-top: 0.25rem;">
+                                    <span class="error-icon">!</span>
+                                    <span class="error-text">Required</span>
+                                </span>
                             </div>
                         </div>
-                        <div class="task-row">
-                            <input type="text" name="task4" placeholder="Task description">
-                            <div class="percentage-input">
-                                <input type="number" name="task4Percent" min="0" max="100" onchange="validatePercentage()">
+                        <div class="task-row" data-task="4">
+                            <div class="form-group" style="margin: 0;">
+                                <input type="text" id="task4" name="task4" placeholder="Task 4 description (optional)">
+                            </div>
+                            <div class="form-group percentage-input" style="margin: 0;">
+                                <input type="number" id="task4Percent" name="task4Percent" min="0" max="100" 
+                                       placeholder="%" onchange="validatePercentage()" oninput="validatePercentage()">
                             </div>
                         </div>
-                        <div class="task-row">
-                            <input type="text" name="task5" placeholder="Task description">
-                            <div class="percentage-input">
-                                <input type="number" name="task5Percent" min="0" max="100" onchange="validatePercentage()">
+                        <div class="task-row" data-task="5">
+                            <div class="form-group" style="margin: 0;">
+                                <input type="text" id="task5" name="task5" placeholder="Task 5 description (optional)">
+                            </div>
+                            <div class="form-group percentage-input" style="margin: 0;">
+                                <input type="number" id="task5Percent" name="task5Percent" min="0" max="100" 
+                                       placeholder="%" onchange="validatePercentage()" oninput="validatePercentage()">
                             </div>
                         </div>
                     </div>
-                    <div id="percentageWarning" style="color: #dc3545; font-size: 0.9rem; margin-top: 0.5rem; display: none;">
-                        ⚠️ Total percentage must equal 100%
+                    <div id="percentageTotal" style="text-align: right; font-weight: 600; color: var(--primary); margin-top: 0.5rem;">
+                        Total: 0%
+                    </div>
+                    <div id="percentageWarning" style="color: var(--error); font-size: 0.9rem; margin-top: 0.5rem; display: none; align-items: center; gap: 0.5rem;">
+                        <span class="error-icon">!</span>
+                        <span>Total percentage must equal exactly 100%</span>
                     </div>
                 </div>
 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevSection()">← Back</button>
-                    <button type="button" class="btn btn-primary" onclick="nextSection()">Next: Requirements →</button>
+                    <button type="button" class="btn btn-primary" onclick="validateAndProceed(2)">Next: Requirements →</button>
                 </div>
             </div>
 
             <!-- Section 4: Qualifications & Experience -->
-            <div class="form-section" id="section-3">
+            <div class="form-section" id="section-3" data-section="3">
                 <div class="section-header">
                     <h2>Section 2A: Qualifications & Experience</h2>
-                    <p>Rate each item 1-5 (1=Not Needed, 5=Must Have). Check "Must Have" for critical requirements.</p>
+                    <p>Provide job-specific details, rate each item 1-5 (1=Not Needed, 5=Must Have). Check "Must Have" for critical requirements.</p>
+                </div>
+
+                <div class="section-error-banner" id="error-banner-3">
+                    <span class="error-icon">!</span>
+                    <span>Please complete all required fields.</span>
                 </div>
 
                 <table class="rating-table">
                     <thead>
                         <tr>
-                            <th>Qualification Item</th>
-                            <th>Rating (1-5)</th>
-                            <th>Must Have?</th>
+                            <th style="width: 25%;">Qualification Item</th>
+                            <th style="width: 35%;">Job Specific Details</th>
+                            <th style="width: 25%;">Rating (1-5)</th>
+                            <th style="width: 15%;">Must Have?</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>
                                 <strong>Education Level</strong><br>
-                                <small style="color: var(--gray);">Degree level required (Bachelor's, Master's, etc.)</small>
+                                <small style="color: var(--gray);">Degree level required</small>
+                            </td>
+                            <td>
+                                <textarea class="job-specific-input" name="eduJobSpecific" placeholder="e.g., Bachelor's degree in Computer Science, Finance, or related field. Master's preferred for senior roles."></textarea>
                             </td>
                             <td>
                                 <div class="rating-cell">
@@ -962,7 +1302,10 @@
                         <tr>
                             <td>
                                 <strong>Field of Study</strong><br>
-                                <small style="color: var(--gray);">Specific discipline (e.g., Computer Science, Finance, Law)</small>
+                                <small style="color: var(--gray);">Specific discipline</small>
+                            </td>
+                            <td>
+                                <textarea class="job-specific-input" name="fieldJobSpecific" placeholder="e.g., Computer Science, Information Technology, Finance, Accounting, Business Administration"></textarea>
                             </td>
                             <td>
                                 <div class="rating-cell">
@@ -980,7 +1323,12 @@
                         <tr>
                             <td>
                                 <strong>Total Years of Experience</strong><br>
-                                <input type="number" name="yearsExperience" placeholder="Years" style="width: 100px; margin-top: 0.5rem;">
+                                <input type="number" id="yearsExperience" name="yearsExperience" placeholder="Years" 
+                                       style="width: 100px; margin-top: 0.5rem;" min="0" max="50"
+                                       data-error="Please enter valid years (0-50)">
+                            </td>
+                            <td>
+                                <textarea class="job-specific-input" name="expJobSpecific" placeholder="e.g., 5+ years in financial services, 3+ years in fintech preferred. Experience with regulatory environments."></textarea>
                             </td>
                             <td>
                                 <div class="rating-cell">
@@ -998,7 +1346,12 @@
                         <tr>
                             <td>
                                 <strong>Fintech Experience</strong><br>
-                                <input type="number" name="fintechYears" placeholder="Years in fintech" style="width: 100px; margin-top: 0.5rem;">
+                                <input type="number" id="fintechYears" name="fintechYears" placeholder="Years in fintech" 
+                                       style="width: 100px; margin-top: 0.5rem;" min="0" max="50"
+                                       data-error="Please enter valid years (0-50)">
+                            </td>
+                            <td>
+                                <textarea class="job-specific-input" name="fintechJobSpecific" placeholder="e.g., Experience with payment systems, digital banking, or financial technology platforms. Knowledge of CBN regulations."></textarea>
                             </td>
                             <td>
                                 <div class="rating-cell">
@@ -1016,7 +1369,10 @@
                         <tr>
                             <td>
                                 <strong>Technical Qualifications</strong><br>
-                                <small style="color: var(--gray);">Bootcamps, vocational training, etc.</small>
+                                <small style="color: var(--gray);">Bootcamps, vocational training</small>
+                            </td>
+                            <td>
+                                <textarea class="job-specific-input" name="techQualJobSpecific" placeholder="e.g., AWS certification, coding bootcamp, CFA Level 1, or specific technical training relevant to role"></textarea>
                             </td>
                             <td>
                                 <div class="rating-cell">
@@ -1035,26 +1391,31 @@
                 </table>
 
                 <div class="form-group">
-                    <label>Additional Notes on Qualifications</label>
-                    <textarea name="qualificationsNotes" placeholder="Any specific requirements not covered above..."></textarea>
+                    <label for="qualificationsNotes">Additional Notes on Qualifications</label>
+                    <textarea id="qualificationsNotes" name="qualificationsNotes" 
+                              placeholder="Any specific requirements not covered above..."></textarea>
                 </div>
 
                 <div class="section-header" style="margin-top: 3rem;">
                     <h2>Section 2B: Certifications</h2>
-                    <p>Check all needed certifications and rate their importance.</p>
+                    <p>Provide job-specific details, check all needed certifications and rate their importance.</p>
                 </div>
 
                 <table class="rating-table">
                     <thead>
                         <tr>
-                            <th>Certification</th>
-                            <th>Importance (1-5)</th>
-                            <th>Required?</th>
+                            <th style="width: 25%;">Certification</th>
+                            <th style="width: 35%;">Job Specific Details</th>
+                            <th style="width: 25%;">Importance (1-5)</th>
+                            <th style="width: 15%;">Required?</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td>Cloud Certifications (AWS/Google/Azure)</td>
+                            <td>
+                                <textarea class="job-specific-input" name="cloudCertJobSpecific" placeholder="e.g., AWS Solutions Architect Associate or Professional, Google Cloud Professional"></textarea>
+                            </td>
                             <td>
                                 <div class="rating-cell">
                                     <input type="range" class="rating-slider" name="cloudCertRating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
@@ -1068,6 +1429,9 @@
                         <tr>
                             <td>Security (CISSP, CISA, CISM)</td>
                             <td>
+                                <textarea class="job-specific-input" name="securityCertJobSpecific" placeholder="e.g., CISSP for security roles, CISA for audit functions, or specific security clearance"></textarea>
+                            </td>
+                            <td>
                                 <div class="rating-cell">
                                     <input type="range" class="rating-slider" name="securityCertRating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
                                     <span class="rating-value">1</span>
@@ -1079,6 +1443,9 @@
                         </tr>
                         <tr>
                             <td>Project Management (PMP, Agile, Scrum)</td>
+                            <td>
+                                <textarea class="job-specific-input" name="pmCertJobSpecific" placeholder="e.g., PMP for project managers, Scrum Master for agile teams, or SAFe certification"></textarea>
+                            </td>
                             <td>
                                 <div class="rating-cell">
                                     <input type="range" class="rating-slider" name="pmCertRating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
@@ -1092,6 +1459,9 @@
                         <tr>
                             <td>Regulatory/Compliance (CBN, NDIC, ACCA)</td>
                             <td>
+                                <textarea class="job-specific-input" name="regulatoryCertJobSpecific" placeholder="e.g., CBN certification for banking roles, ACCA for finance, or compliance-specific credentials"></textarea>
+                            </td>
+                            <td>
                                 <div class="rating-cell">
                                     <input type="range" class="rating-slider" name="regulatoryCertRating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
                                     <span class="rating-value">1</span>
@@ -1103,7 +1473,10 @@
                         </tr>
                         <tr>
                             <td>
-                                <input type="text" name="otherCertName" placeholder="Other certification..." style="width: 100%;">
+                                <input type="text" id="otherCertName" name="otherCertName" placeholder="Other certification..." style="width: 100%;">
+                            </td>
+                            <td>
+                                <textarea class="job-specific-input" name="otherCertJobSpecific" placeholder="Specify job requirements for this certification..."></textarea>
                             </td>
                             <td>
                                 <div class="rating-cell">
@@ -1119,21 +1492,27 @@
                 </table>
 
                 <div class="form-group">
-                    <label>Certification Notes</label>
-                    <textarea name="certificationsNotes" placeholder="Specific certification requirements or preferences..."></textarea>
+                    <label for="certificationsNotes">Certification Notes</label>
+                    <textarea id="certificationsNotes" name="certificationsNotes" 
+                              placeholder="Specific certification requirements or preferences..."></textarea>
                 </div>
 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevSection()">← Back</button>
-                    <button type="button" class="btn btn-primary" onclick="nextSection()">Next: Skills & Traits →</button>
+                    <button type="button" class="btn btn-primary" onclick="validateAndProceed(3)">Next: Skills →</button>
                 </div>
             </div>
 
             <!-- Section 5: Skills & Behavioral Traits -->
-            <div class="form-section" id="section-4">
+            <div class="form-section" id="section-4" data-section="4">
                 <div class="section-header">
                     <h2>Section 2C: Functional Skills</h2>
-                    <p>Rate the technical and functional skills required for this role (1=Basic, 5=Expert/World-class).</p>
+                    <p>Provide job-specific details and rate technical/functional skills required for this role (1=Basic, 5=Expert).</p>
+                </div>
+
+                <div class="section-error-banner" id="error-banner-4">
+                    <span class="error-icon">!</span>
+                    <span>Please complete all required fields.</span>
                 </div>
 
                 <div class="skill-category">
@@ -1141,9 +1520,10 @@
                     <table class="rating-table" style="margin: 0;">
                         <thead>
                             <tr>
-                                <th>Skill</th>
-                                <th>Rating (1-5)</th>
-                                <th>Critical Path?</th>
+                                <th style="width: 20%;">Skill</th>
+                                <th style="width: 35%;">Job Specific Details</th>
+                                <th style="width: 25%;">Rating (1-5)</th>
+                                <th style="width: 20%;">Critical Path?</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1151,6 +1531,9 @@
                                 <td>
                                     <strong>Data Analysis</strong><br>
                                     <small>SQL, Excel, statistical analysis</small>
+                                </td>
+                                <td>
+                                    <textarea class="job-specific-input" name="dataAnalysisJobSpecific" placeholder="e.g., Advanced SQL queries, Python pandas, statistical modeling, or specific BI tools required"></textarea>
                                 </td>
                                 <td>
                                     <div class="rating-cell">
@@ -1166,6 +1549,9 @@
                                     <small>Python, Java, JavaScript, etc.</small>
                                 </td>
                                 <td>
+                                    <textarea class="job-specific-input" name="codingJobSpecific" placeholder="e.g., Python for data engineering, Java for backend, React for frontend, or specific frameworks"></textarea>
+                                </td>
+                                <td>
                                     <div class="rating-cell">
                                         <input type="range" class="rating-slider" name="codingRating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
                                         <span class="rating-value">1</span>
@@ -1177,6 +1563,9 @@
                                 <td>
                                     <strong>Risk & Fraud Management</strong><br>
                                     <small>Detection tools, risk assessment</small>
+                                </td>
+                                <td>
+                                    <textarea class="job-specific-input" name="riskToolsJobSpecific" placeholder="e.g., Experience with fraud detection systems, risk scoring models, or AML monitoring tools"></textarea>
                                 </td>
                                 <td>
                                     <div class="rating-cell">
@@ -1192,6 +1581,9 @@
                                     <small>Interswitch, NIBSS, Core Banking</small>
                                 </td>
                                 <td>
+                                    <textarea class="job-specific-input" name="paymentsJobSpecific" placeholder="e.g., Interswitch integration, NIBSS Instant Payment, core banking platforms, or mobile money systems"></textarea>
+                                </td>
+                                <td>
                                     <div class="rating-cell">
                                         <input type="range" class="rating-slider" name="paymentsRating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
                                         <span class="rating-value">1</span>
@@ -1203,6 +1595,9 @@
                                 <td>
                                     <strong>Reporting & Visualization</strong><br>
                                     <small>Tableau, Power BI, Looker</small>
+                                </td>
+                                <td>
+                                    <textarea class="job-specific-input" name="reportingJobSpecific" placeholder="e.g., Tableau dashboard creation, Power BI DAX formulas, or Looker ML models"></textarea>
                                 </td>
                                 <td>
                                     <div class="rating-cell">
@@ -1217,6 +1612,9 @@
                                     <input type="text" name="customSkill1" placeholder="Other skill 1..." style="width: 100%;">
                                 </td>
                                 <td>
+                                    <textarea class="job-specific-input" name="customSkill1JobSpecific" placeholder="Describe job-specific requirements for this skill..."></textarea>
+                                </td>
+                                <td>
                                     <div class="rating-cell">
                                         <input type="range" class="rating-slider" name="customSkill1Rating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
                                         <span class="rating-value">1</span>
@@ -1229,6 +1627,9 @@
                                     <input type="text" name="customSkill2" placeholder="Other skill 2..." style="width: 100%;">
                                 </td>
                                 <td>
+                                    <textarea class="job-specific-input" name="customSkill2JobSpecific" placeholder="Describe job-specific requirements for this skill..."></textarea>
+                                </td>
+                                <td>
                                     <div class="rating-cell">
                                         <input type="range" class="rating-slider" name="customSkill2Rating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
                                         <span class="rating-value">1</span>
@@ -1236,13 +1637,59 @@
                                 </td>
                                 <td><input type="checkbox" name="customSkill2Critical"></td>
                             </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" name="customSkill3" placeholder="Other skill 3..." style="width: 100%;">
+                                </td>
+                                <td>
+                                    <textarea class="job-specific-input" name="customSkill3JobSpecific" placeholder="Describe job-specific requirements for this skill..."></textarea>
+                                </td>
+                                <td>
+                                    <div class="rating-cell">
+                                        <input type="range" class="rating-slider" name="customSkill3Rating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
+                                        <span class="rating-value">1</span>
+                                    </div>
+                                </td>
+                                <td><input type="checkbox" name="customSkill3Critical"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" name="customSkill4" placeholder="Other skill 4..." style="width: 100%;">
+                                </td>
+                                <td>
+                                    <textarea class="job-specific-input" name="customSkill4JobSpecific" placeholder="Describe job-specific requirements for this skill..."></textarea>
+                                </td>
+                                <td>
+                                    <div class="rating-cell">
+                                        <input type="range" class="rating-slider" name="customSkill4Rating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
+                                        <span class="rating-value">1</span>
+                                    </div>
+                                </td>
+                                <td><input type="checkbox" name="customSkill4Critical"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <input type="text" name="customSkill5" placeholder="Other skill 5..." style="width: 100%;">
+                                </td>
+                                <td>
+                                    <textarea class="job-specific-input" name="customSkill5JobSpecific" placeholder="Describe job-specific requirements for this skill..."></textarea>
+                                </td>
+                                <td>
+                                    <div class="rating-cell">
+                                        <input type="range" class="rating-slider" name="customSkill5Rating" min="1" max="5" value="1" oninput="updateRatingValue(this)">
+                                        <span class="rating-value">1</span>
+                                    </div>
+                                </td>
+                                <td><input type="checkbox" name="customSkill5Critical"></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <div class="form-group">
-                    <label>Functional Skills Notes</label>
-                    <textarea name="skillsNotes" placeholder="Specific tools, technologies, or methodologies required..."></textarea>
+                    <label for="skillsNotes">Functional Skills Notes</label>
+                    <textarea id="skillsNotes" name="skillsNotes" 
+                              placeholder="Specific tools, technologies, or methodologies required..."></textarea>
                 </div>
 
                 <div class="section-header" style="margin-top: 3rem;">
@@ -1336,48 +1783,92 @@
 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevSection()">← Back</button>
-                    <button type="button" class="btn btn-primary" onclick="nextSection()">Next: Performance →</button>
+                    <button type="button" class="btn btn-primary" onclick="validateAndProceed(4)">Next: Performance →</button>
                 </div>
             </div>
 
             <!-- Section 6: Performance, Risks, Tools -->
-            <div class="form-section" id="section-5">
+            <div class="form-section" id="section-5" data-section="5">
                 <div class="section-header">
                     <h2>Section 3: Results, Risks & Tools</h2>
                     <p>How success is measured and what could go wrong.</p>
                 </div>
 
+                <div class="section-error-banner" id="error-banner-5">
+                    <span class="error-icon">!</span>
+                    <span>Please complete all required fields.</span>
+                </div>
+
                 <div class="form-group">
-                    <label class="required">Key Performance Indicators (3 KPIs)</label>
+                    <label class="required" for="kpi1">Key Performance Indicators (3 KPIs)</label>
                     <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">How will you measure success in this role?</p>
-                    <input type="text" name="kpi1" placeholder="e.g., 95% system uptime" required style="margin-bottom: 0.5rem;">
-                    <input type="text" name="kpi2" placeholder="e.g., <24hr KYC turnaround time" required style="margin-bottom: 0.5rem;">
-                    <input type="text" name="kpi3" placeholder="e.g., 0% regulatory findings" required>
+                    <input type="text" id="kpi1" name="kpi1" placeholder="e.g., 95% system uptime" required
+                           data-error="KPI 1 is required">
+                    <span class="error-message" id="error-kpi1">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Required</span>
+                    </span>
+                    <input type="text" id="kpi2" name="kpi2" placeholder="e.g., <24hr KYC turnaround time" required
+                           style="margin-top: 0.5rem;" data-error="KPI 2 is required">
+                    <span class="error-message" id="error-kpi2" style="margin-top: 0.25rem;">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Required</span>
+                    </span>
+                    <input type="text" id="kpi3" name="kpi3" placeholder="e.g., 0% regulatory findings" required
+                           style="margin-top: 0.5rem;" data-error="KPI 3 is required">
+                    <span class="error-message" id="error-kpi3" style="margin-top: 0.25rem;">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Required</span>
+                    </span>
                 </div>
 
                 <div class="form-group" style="margin-top: 2rem;">
-                    <label class="required">Major Risks if Role Fails (3-5 items)</label>
+                    <label class="required" for="risks">Major Risks if Role Fails (3-5 items)</label>
                     <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">What are the consequences of failure?</p>
-                    <textarea name="risks" required placeholder="e.g., 
+                    <textarea id="risks" name="risks" required 
+                              placeholder="e.g., 
 1. Regulatory fines from CBN for non-compliance
 2. Customer data breach
 3. Financial reconciliation errors
-4. Service downtime affecting transactions"></textarea>
+4. Service downtime affecting transactions"
+                              minlength="10" data-error="Please describe the risks"></textarea>
+                    <span class="error-message" id="error-risks">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Risk analysis is required</span>
+                    </span>
                 </div>
 
                 <div class="form-group" style="margin-top: 2rem;">
-                    <label class="required">Tools Used Daily</label>
+                    <label class="required" for="dailyTools">Tools Used Daily</label>
                     <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Software, systems, and platforms essential for the role</p>
-                    <textarea name="dailyTools" required placeholder="e.g., Core Banking Software, Payment Gateway back-end, Google Workspace, Jira, Tableau, Slack"></textarea>
+                    <textarea id="dailyTools" name="dailyTools" required 
+                              placeholder="e.g., Core Banking Software, Payment Gateway back-end, Google Workspace, Jira, Tableau, Slack"
+                              data-error="Please list the tools used"></textarea>
+                    <span class="error-message" id="error-dailyTools">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Tools information is required</span>
+                    </span>
                 </div>
 
                 <div class="form-group" style="margin-top: 2rem;">
                     <label>Work Guides & References</label>
-                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Policies, handbooks, or references used in performing duties</p>
-                    <input type="text" name="workGuide1" value="Company Policy" style="margin-bottom: 0.5rem;">
-                    <input type="text" name="workGuide2" value="Employee Handbook / Code of Conduct" style="margin-bottom: 0.5rem;">
-                    <input type="text" name="workGuide3" placeholder="Other reference..." style="margin-bottom: 0.5rem;">
-                    <input type="text" name="workGuide4" placeholder="Other reference...">
+                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Select all that apply and add additional references</p>
+                    
+                    <div class="work-guide-item">
+                        <input type="checkbox" id="workGuide1Check" name="workGuide1Check" checked>
+                        <label for="workGuide1Check">Company Policy</label>
+                    </div>
+                    
+                    <div class="work-guide-item">
+                        <input type="checkbox" id="workGuide2Check" name="workGuide2Check" checked>
+                        <label for="workGuide2Check">Employee Handbook / Code of Conduct</label>
+                    </div>
+                    
+                    <input type="text" id="workGuide3" name="workGuide3" placeholder="Other reference 1..." style="margin-bottom: 0.5rem;">
+                    <input type="text" id="workGuide4" name="workGuide4" placeholder="Other reference 2..." style="margin-bottom: 0.5rem;">
+                    <input type="text" id="workGuide5" name="workGuide5" placeholder="Other reference 3..." style="margin-bottom: 0.5rem;">
+                    <input type="text" id="workGuide6" name="workGuide6" placeholder="Other reference 4..." style="margin-bottom: 0.5rem;">
+                    <input type="text" id="workGuide7" name="workGuide7" placeholder="Other reference 5...">
                 </div>
 
                 <div class="section-header" style="margin-top: 3rem;">
@@ -1385,9 +1876,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="required">Autonomy Level Description</label>
+                    <label class="required" for="autonomyDescription">Autonomy Level Description</label>
                     <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Describe the decision-making authority and independence</p>
-                    <textarea name="autonomyDescription" required placeholder="e.g., Independent decisions on routine transactions up to NGN 1M; escalates high-risk cases to Head of Risk. Authority to approve vendor payments under $5K."></textarea>
+                    <textarea id="autonomyDescription" name="autonomyDescription" required 
+                              placeholder="e.g., Independent decisions on routine transactions up to NGN 1M; escalates high-risk cases to Head of Risk. Authority to approve vendor payments under $5K."
+                              minlength="10" data-error="Please describe the autonomy level"></textarea>
+                    <span class="error-message" id="error-autonomyDescription">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Autonomy description is required</span>
+                    </span>
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">
@@ -1411,7 +1908,7 @@
                         </label>
                         <label class="decision-checkbox">
                             <input type="checkbox" name="decisionPeople">
-                            <span>People-Related (hiring, team assignments)</span>
+                            <span>People-related (hiring, team assignments)</span>
                         </label>
                         <label class="decision-checkbox">
                             <input type="checkbox" name="decisionRegulatory">
@@ -1421,8 +1918,8 @@
                 </div>
 
                 <div class="form-group" style="margin-top: 2rem;">
-                    <label>Other Decision Types</label>
-                    <input type="text" name="decisionOther" placeholder="Specify if applicable...">
+                    <label for="decisionOther">Other Decision Types</label>
+                    <input type="text" id="decisionOther" name="decisionOther" placeholder="Specify if applicable...">
                 </div>
 
                 <div class="section-header" style="margin-top: 3rem;">
@@ -1430,9 +1927,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Direct Reports</label>
+                    <label for="directReports">Direct Reports</label>
                     <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Number and roles of staff reporting to this position</p>
-                    <input type="text" name="directReports" placeholder="e.g., 3 (2 Analysts, 1 Associate)">
+                    <input type="text" id="directReports" name="directReports" placeholder="e.g., 3 (2 Analysts, 1 Associate)">
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">
@@ -1445,86 +1942,363 @@
                         <div class="stakeholder-input">
                             <input type="text" name="stakeholder2" placeholder="e.g., Technology vendors">
                         </div>
+                        <div class="stakeholder-input">
+                            <input type="text" name="stakeholder3" placeholder="e.g., Internal Audit">
+                        </div>
+                        <div class="stakeholder-input">
+                            <input type="text" name="stakeholder4" placeholder="e.g., Product Team">
+                        </div>
+                        <div class="stakeholder-input">
+                            <input type="text" name="stakeholder5" placeholder="e.g., External Legal Counsel">
+                        </div>
                     </div>
-                    <button type="button" class="add-btn" onclick="addStakeholder()">+ Add Stakeholder</button>
                 </div>
 
                 <div class="form-group" style="margin-top: 1.5rem;">
-                    <label>Organizational Structure Notes</label>
-                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">Describe reporting lines or attach organogram separately</p>
-                    <textarea name="orgStructure" placeholder="e.g., Reports to Head of Operations. Peer group includes 4 other Team Leads. Matrix relationship with Risk Department."></textarea>
+                    <label class="required" for="orgStructureUpload">Organizational Structure</label>
+                    <p style="font-size: 0.9rem; color: var(--gray); margin-bottom: 0.5rem;">
+                        Upload a screenshot, picture, or diagram showing reporting lines (Required)
+                    </p>
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="orgStructureUpload" name="orgStructureUpload" required
+                               accept="image/*,.pdf,.doc,.docx"
+                               onchange="handleFileUpload(this)"
+                               data-error="Please upload an organizational structure document">
+                        <label for="orgStructureUpload" class="file-upload-label" id="fileUploadLabel">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            <span>Click to upload organogram (Image, PDF, or Document)</span>
+                        </label>
+                    </div>
+                    <div class="file-name" id="fileName"></div>
+                    <span class="error-message" id="error-orgStructureUpload" style="margin-top: 0.5rem;">
+                        <span class="error-icon">!</span>
+                        <span class="error-text">Organizational structure upload is required</span>
+                    </span>
                 </div>
 
                 <div class="btn-group">
                     <button type="button" class="btn btn-secondary" onclick="prevSection()">← Back</button>
-                    <button type="button" class="btn btn-primary" onclick="nextSection()">Review & Submit →</button>
+                    <button type="button" class="btn btn-primary" onclick="validateAndProceed(5)">Review & Submit →</button>
                 </div>
             </div>
 
             <!-- Section 7: Review & Submit -->
-            <div class="form-section" id="section-6">
+            <div class="form-section" id="section-6" data-section="6">
                 <div class="section-header">
                     <h2>Final Review</h2>
-                    <p>Review your responses before submission. Click "Preview Document" to see the formatted output.</p>
+                    <p>Review your responses before submission. Ensure all information is accurate and complete.</p>
                 </div>
 
                 <div class="info-box">
-                    <h4>Submission Checklist</h4>
-                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
-                        <li>All required fields completed</li>
-                        <li>Task percentages total 100%</li>
-                        <li>Job family selected</li>
-                        <li>KPIs and risks documented</li>
+                    <h4>📋 Submission Checklist</h4>
+                    <ul style="margin-left: 1.5rem; margin-top: 0.5rem; line-height: 1.8;">
+                        <li>✓ All required fields completed</li>
+                        <li>✓ Task percentages total 100%</li>
+                        <li>✓ Job family selected</li>
+                        <li>✓ KPIs and risks documented</li>
+                        <li>✓ Decision-making authority defined</li>
+                        <li>✓ Organizational structure uploaded</li>
                     </ul>
                 </div>
 
                 <div class="form-group">
-                    <label>Additional Comments</label>
-                    <textarea name="finalComments" placeholder="Any other information relevant to this job analysis..."></textarea>
+                    <label for="finalComments">Additional Comments</label>
+                    <textarea id="finalComments" name="finalComments" 
+                              placeholder="Any other information relevant to this job analysis..."></textarea>
                 </div>
 
                 <div class="btn-group" style="flex-direction: column; gap: 1rem;">
-                    <button type="button" class="btn btn-secondary" onclick="previewDocument()" style="width: 100%; justify-content: center;">
-                        👁️ Preview Document
+                    <button type="button" class="btn btn-secondary" onclick="prevSection()" style="width: 100%; justify-content: center;">
+                        ← Back to Edit
                     </button>
-                    <div style="display: flex; gap: 1rem; width: 100%;">
-                        <button type="button" class="btn btn-secondary" onclick="prevSection()" style="flex: 1;">← Back to Edit</button>
-                        <button type="button" class="btn btn-success" onclick="submitForm()" style="flex: 2; justify-content: center;">
-                            ✉️ Submit to Malyom
-                        </button>
-                    </div>
-                </div>
-
-                <div class="loading" id="loadingIndicator">
-                    <div class="spinner"></div>
-                    <p>Preparing your submission...</p>
-                </div>
-
-                <div class="success-message" id="successMessage">
-                    <h3>✓ Submission Successful!</h3>
-                    <p>Your job analysis has been formatted and sent to <strong>fredrickade469@gmail.com</strong></p>
-                    <p style="margin-top: 1rem; font-size: 0.9rem;">A copy has been saved for your records. Malyom will review and contact you if follow-up is needed.</p>
+                    <button type="button" class="btn btn-success" onclick="submitForm()" style="width: 100%; justify-content: center; padding: 1.25rem; font-size: 1.1rem;">
+                        ✓ Submit Job Analysis
+                    </button>
                 </div>
             </div>
         </form>
     </div>
 
-    <!-- Preview Modal -->
-    <div class="preview-modal" id="previewModal">
-        <div class="preview-content">
-            <button class="close-preview" onclick="closePreview()">×</button>
-            <div class="preview-document" id="previewDocument">
-                <!-- Content populated by JavaScript -->
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="color: var(--primary); font-weight: 600; font-size: 1.2rem;">Processing your submission...</p>
+        <p style="color: var(--gray); font-size: 0.9rem;">Please do not close this window</p>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="success-modal">
+            <div class="success-icon-large">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                </svg>
             </div>
-            <div style="margin-top: 2rem; text-align: center;">
-                <button type="button" class="btn btn-secondary" onclick="closePreview()">Close Preview</button>
-            </div>
+            <h2>The Malyom Advisory thanks you for your input</h2>
+            <p class="message">
+                Your job analysis has been successfully submitted and is being processed.
+                We appreciate your time and detailed responses.
+            </p>
+            <button class="close-btn" onclick="closeSuccessModal()">Close</button>
         </div>
     </div>
 
     <script>
         let currentSection = 0;
         const totalSections = 7;
+        let uploadedFile = null;
+
+        // Initialize date field with today's date
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateField = document.getElementById('analysisDate');
+            if (dateField) {
+                dateField.valueAsDate = new Date();
+            }
+
+            // Add real-time validation listeners
+            setupRealTimeValidation();
+        });
+
+        function setupRealTimeValidation() {
+            // Add input listeners to all required fields
+            document.querySelectorAll('input[required], textarea[required]').forEach(field => {
+                field.addEventListener('blur', function() {
+                    validateField(this);
+                });
+                field.addEventListener('input', function() {
+                    if (this.classList.contains('error')) {
+                        validateField(this);
+                    }
+                });
+            });
+        }
+
+        function validateField(field) {
+            const errorElement = document.getElementById(`error-${field.id}`);
+            let isValid = true;
+            let errorMessage = '';
+
+            // Check if empty
+            if (!field.value.trim()) {
+                isValid = false;
+                errorMessage = field.dataset.error || 'This field is required';
+            } else {
+                // Pattern validation
+                if (field.pattern) {
+                    const pattern = new RegExp(field.pattern);
+                    if (!pattern.test(field.value)) {
+                        isValid = false;
+                        errorMessage = field.dataset.error || 'Invalid format';
+                    }
+                }
+
+                // Min length validation
+                if (field.minLength && field.value.length < field.minLength) {
+                    isValid = false;
+                    errorMessage = `Minimum ${field.minLength} characters required`;
+                }
+
+                // Max length validation
+                if (field.maxLength && field.value.length > field.maxLength) {
+                    isValid = false;
+                    errorMessage = `Maximum ${field.maxLength} characters allowed`;
+                }
+
+                // Email validation
+                if (field.type === 'email') {
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(field.value)) {
+                        isValid = false;
+                        errorMessage = 'Please enter a valid email address';
+                    }
+                }
+
+                // Number validation
+                if (field.type === 'number') {
+                    const value = parseFloat(field.value);
+                    if (isNaN(value)) {
+                        isValid = false;
+                        errorMessage = 'Please enter a valid number';
+                    } else if (field.min && value < parseFloat(field.min)) {
+                        isValid = false;
+                        errorMessage = `Minimum value is ${field.min}`;
+                    } else if (field.max && value > parseFloat(field.max)) {
+                        isValid = false;
+                        errorMessage = `Maximum value is ${field.max}`;
+                    }
+                }
+
+                // File validation
+                if (field.type === 'file') {
+                    if (field.files.length === 0) {
+                        isValid = false;
+                        errorMessage = 'Please upload a file';
+                    }
+                }
+            }
+
+            // Update UI
+            if (isValid) {
+                field.classList.remove('error');
+                field.classList.add('valid');
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+            } else {
+                field.classList.add('error');
+                field.classList.remove('valid');
+                if (errorElement) {
+                    errorElement.classList.add('show');
+                    errorElement.querySelector('.error-text').textContent = errorMessage;
+                }
+            }
+
+            return isValid;
+        }
+
+        function validateSection(sectionIndex) {
+            const section = document.getElementById(`section-${sectionIndex}`);
+            const requiredFields = section.querySelectorAll('[required]');
+            let isValid = true;
+            let firstError = null;
+
+            requiredFields.forEach(field => {
+                if (!validateField(field)) {
+                    isValid = false;
+                    if (!firstError) {
+                        firstError = field;
+                    }
+                }
+            });
+
+            // Special validations for specific sections
+            if (sectionIndex === 1) {
+                // Job family validation
+                const selectedFamily = document.getElementById('selectedJobFamily').value;
+                const otherFamily = document.getElementById('jobFamilyOther').value.trim();
+                if (!selectedFamily && !otherFamily) {
+                    isValid = false;
+                    document.getElementById('error-banner-1').classList.add('show');
+                    document.querySelectorAll('.job-family-card').forEach(card => {
+                        card.classList.add('error');
+                    });
+                } else {
+                    document.getElementById('error-banner-1').classList.remove('show');
+                    document.querySelectorAll('.job-family-card').forEach(card => {
+                        card.classList.remove('error');
+                    });
+                }
+            }
+
+            if (sectionIndex === 2) {
+                // Task percentage validation
+                const total = calculateTaskPercentage();
+                if (total !== 100) {
+                    isValid = false;
+                    document.getElementById('percentageWarning').style.display = 'flex';
+                    document.getElementById('percentageWarning').querySelector('span:last-child').textContent = 
+                        `Current total: ${total}% (must equal exactly 100%)`;
+                } else {
+                    document.getElementById('percentageWarning').style.display = 'none';
+                }
+            }
+
+            // Show/hide section error banner
+            const errorBanner = document.getElementById(`error-banner-${sectionIndex}`);
+            if (errorBanner) {
+                if (!isValid) {
+                    errorBanner.classList.add('show');
+                } else {
+                    errorBanner.classList.remove('show');
+                }
+            }
+
+            // Scroll to first error if any
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+
+            return isValid;
+        }
+
+        function validateAndProceed(sectionIndex) {
+            if (validateSection(sectionIndex)) {
+                nextSection();
+            }
+        }
+
+        function calculateTaskPercentage() {
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                const val = document.getElementById(`task${i}Percent`);
+                if (val && val.value) {
+                    total += parseInt(val.value) || 0;
+                }
+            }
+            return total;
+        }
+
+        function validatePercentage() {
+            const total = calculateTaskPercentage();
+            const totalDisplay = document.getElementById('percentageTotal');
+            const warning = document.getElementById('percentageWarning');
+            
+            totalDisplay.textContent = `Total: ${total}%`;
+            
+            if (total === 100) {
+                totalDisplay.style.color = 'var(--success)';
+                warning.style.display = 'none';
+                document.querySelectorAll('.task-row').forEach(row => {
+                    row.classList.remove('error');
+                });
+            } else {
+                totalDisplay.style.color = 'var(--error)';
+                warning.style.display = 'flex';
+                warning.querySelector('span:last-child').textContent = 
+                    `Current total: ${total}% (must equal exactly 100%)`;
+            }
+        }
+
+        function handleFileUpload(input) {
+            const fileNameDisplay = document.getElementById('fileName');
+            const label = document.getElementById('fileUploadLabel');
+            const errorElement = document.getElementById('error-orgStructureUpload');
+            
+            if (input.files && input.files[0]) {
+                uploadedFile = input.files[0];
+                fileNameDisplay.textContent = `📎 ${uploadedFile.name}`;
+                label.classList.add('has-file');
+                label.innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <span>File selected: ${uploadedFile.name}</span>
+                `;
+                if (errorElement) {
+                    errorElement.classList.remove('show');
+                }
+                input.classList.remove('error');
+                input.classList.add('valid');
+            } else {
+                uploadedFile = null;
+                fileNameDisplay.textContent = '';
+                label.classList.remove('has-file');
+                label.innerHTML = `
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span>Click to upload organogram (Image, PDF, or Document)</span>
+                `;
+            }
+        }
 
         function updateProgress() {
             const steps = document.querySelectorAll('.step');
@@ -1551,10 +2325,8 @@
         }
 
         function nextSection() {
-            if (validateCurrentSection()) {
-                if (currentSection < totalSections - 1) {
-                    showSection(currentSection + 1);
-                }
+            if (currentSection < totalSections - 1) {
+                showSection(currentSection + 1);
             }
         }
 
@@ -1564,40 +2336,23 @@
             }
         }
 
-        function goToSection(index) {
-            // Only allow going to completed sections or current section
-            if (index <= currentSection || document.querySelectorAll('.step')[index].classList.contains('completed')) {
-                showSection(index);
-            }
-        }
-
-        function validateCurrentSection() {
-            const currentForm = document.getElementById(`section-${currentSection}`);
-            const requiredFields = currentForm.querySelectorAll('[required]');
-            let valid = true;
-
-            requiredFields.forEach(field => {
-                if (!field.value.trim()) {
-                    field.style.borderColor = '#dc3545';
-                    valid = false;
-                } else {
-                    field.style.borderColor = '';
-                }
-            });
-
-            if (!valid) {
-                alert('Please fill in all required fields before proceeding.');
-            }
-
-            return valid;
-        }
-
         function selectJobFamily(family, element) {
             document.querySelectorAll('.job-family-card').forEach(card => {
-                card.classList.remove('selected');
+                card.classList.remove('selected', 'error');
             });
             element.classList.add('selected');
             document.getElementById('selectedJobFamily').value = family;
+            document.getElementById('error-banner-1').classList.remove('show');
+        }
+
+        function clearJobFamilyError() {
+            const otherInput = document.getElementById('jobFamilyOther');
+            if (otherInput.value.trim()) {
+                document.querySelectorAll('.job-family-card').forEach(card => {
+                    card.classList.remove('error');
+                });
+                document.getElementById('error-banner-1').classList.remove('show');
+            }
         }
 
         function updateRatingValue(slider) {
@@ -1614,38 +2369,29 @@
             }
         }
 
-        function validatePercentage() {
-            const inputs = document.querySelectorAll('[name$="Percent"]');
-            let total = 0;
-            inputs.forEach(input => {
-                total += parseInt(input.value) || 0;
-            });
-            
-            const warning = document.getElementById('percentageWarning');
-            if (total !== 100) {
-                warning.style.display = 'block';
-                warning.textContent = `⚠️ Current total: ${total}% (must equal 100%)`;
-            } else {
-                warning.style.display = 'none';
-            }
-        }
-
-        function addStakeholder() {
-            const container = document.getElementById('stakeholderContainer');
-            const div = document.createElement('div');
-            div.className = 'stakeholder-input';
-            div.innerHTML = `
-                <input type="text" name="stakeholder${container.children.length + 1}" placeholder="Additional stakeholder...">
-                <button type="button" onclick="this.parentElement.remove()" style="background: #dc3545; color: white; border: none; padding: 0.5rem; border-radius: 4px; cursor: pointer;">×</button>
-            `;
-            container.appendChild(div);
-        }
-
-        function generateDocumentContent() {
+        function generateFormattedData() {
             const form = document.getElementById('jobAnalysisForm');
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
             
+            // Calculate task percentages
+            let taskTotal = 0;
+            const tasks = [];
+            for (let i = 1; i <= 5; i++) {
+                const task = data[`task${i}`];
+                const percent = data[`task${i}Percent`];
+                if (task && percent) {
+                    tasks.push({ task, percent: parseInt(percent) });
+                    taskTotal += parseInt(percent);
+                }
+            }
+
+            // Get checkboxes (FormData doesn't include unchecked boxes)
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                data[checkbox.name] = checkbox.checked;
+            });
+
             const jobFamilyNames = {
                 'tech': 'Technology & Engineering',
                 'product': 'Product & Design',
@@ -1657,287 +2403,294 @@
                 'legal': 'Legal & Governance'
             };
 
-            return `
-                <div style="font-family: 'Times New Roman', serif; max-width: 800px; margin: 0 auto; color: #000;">
-                    <div style="text-align: center; border-bottom: 3px double #0d5c5c; padding-bottom: 20px; margin-bottom: 30px;">
-                        <h1 style="color: #0d5c5c; font-size: 28px; margin-bottom: 10px;">MALYOM FINTECH</h1>
-                        <h2 style="color: #c9a962; font-size: 22px; margin-bottom: 5px;">Job Analysis Report</h2>
-                        <p style="color: #666; font-size: 14px;">The Human Intelligence Agency</p>
-                    </div>
-
-                    <div style="background: #f5f5f5; padding: 20px; margin-bottom: 30px; border-left: 4px solid #c9a962;">
-                        <h3 style="color: #0d5c5c; margin-top: 0;">Position Information</h3>
-                        <table style="width: 100%; border-collapse: collapse;">
-                            <tr>
-                                <td style="padding: 8px 0; width: 30%;"><strong>Job Title:</strong></td>
-                                <td style="padding: 8px 0;">${data.jobTitle || 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 0;"><strong>Department:</strong></td>
-                                <td style="padding: 8px 0;">${data.department || 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 0;"><strong>Job Family:</strong></td>
-                                <td style="padding: 8px 0;">${jobFamilyNames[data.selectedJobFamily] || data.jobFamilyOther || 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 0;"><strong>Incumbent:</strong></td>
-                                <td style="padding: 8px 0;">${data.subordinateName || 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 0;"><strong>Team Lead:</strong></td>
-                                <td style="padding: 8px 0;">${data.teamLeadName || 'N/A'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px 0;"><strong>Analysis Date:</strong></td>
-                                <td style="padding: 8px 0;">${data.analysisDate || 'N/A'}</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">1. JOB PURPOSE</h3>
-                    <p style="line-height: 1.8; margin-bottom: 20px;">${data.jobGoal || 'Not specified'}</p>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">2. KEY RESPONSIBILITIES</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                        <thead>
-                            <tr style="background: #0d5c5c; color: white;">
-                                <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Task</th>
-                                <th style="padding: 10px; text-align: center; border: 1px solid #ddd; width: 100px;">Time %</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${[1,2,3,4,5].map(i => {
-                                const task = data[`task${i}`];
-                                const percent = data[`task${i}Percent`];
-                                if (task) {
-                                    return `<tr>
-                                        <td style="padding: 10px; border: 1px solid #ddd;">${task}</td>
-                                        <td style="padding: 10px; text-align: center; border: 1px solid #ddd;">${percent || 0}%</td>
-                                    </tr>`;
-                                }
-                                return '';
-                            }).join('')}
-                        </tbody>
-                    </table>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">3. QUALIFICATIONS & REQUIREMENTS</h3>
-                    
-                    <h4 style="color: #333; margin-top: 20px;">3.1 Education & Experience</h4>
-                    <ul style="line-height: 1.8;">
-                        <li><strong>Education Level:</strong> Rating ${data.eduRating}/5 ${data.eduMustHave ? '(Required)' : ''}</li>
-                        <li><strong>Field of Study:</strong> Rating ${data.fieldRating}/5 ${data.fieldMustHave ? '(Required)' : ''}</li>
-                        <li><strong>Total Experience:</strong> ${data.yearsExperience || 'N/A'} years (Rating: ${data.expRating}/5) ${data.expMustHave ? '(Required)' : ''}</li>
-                        <li><strong>Fintech Experience:</strong> ${data.fintechYears || 'N/A'} years (Rating: ${data.fintechRating}/5) ${data.fintechMustHave ? '(Required)' : ''}</li>
-                    </ul>
-                    ${data.qualificationsNotes ? `<p><em>Notes: ${data.qualificationsNotes}</em></p>` : ''}
-
-                    <h4 style="color: #333; margin-top: 20px;">3.2 Certifications</h4>
-                    <ul style="line-height: 1.8;">
-                        ${data.cloudCertRating > 1 ? `<li>Cloud Certifications: Importance ${data.cloudCertRating}/5 ${data.cloudCertRequired ? '[REQUIRED]' : ''}</li>` : ''}
-                        ${data.securityCertRating > 1 ? `<li>Security Certifications: Importance ${data.securityCertRating}/5 ${data.securityCertRequired ? '[REQUIRED]' : ''}</li>` : ''}
-                        ${data.pmCertRating > 1 ? `<li>Project Management: Importance ${data.pmCertRating}/5 ${data.pmCertRequired ? '[REQUIRED]' : ''}</li>` : ''}
-                        ${data.regulatoryCertRating > 1 ? `<li>Regulatory/Compliance: Importance ${data.regulatoryCertRating}/5 ${data.regulatoryCertRequired ? '[REQUIRED]' : ''}</li>` : ''}
-                        ${data.otherCertName ? `<li>${data.otherCertName}: Importance ${data.otherCertRating}/5 ${data.otherCertRequired ? '[REQUIRED]' : ''}</li>` : ''}
-                    </ul>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">4. COMPETENCIES</h3>
-                    
-                    <h4 style="color: #333; margin-top: 20px;">4.1 Functional Skills</h4>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                        <thead>
-                            <tr style="background: #f5f5f5;">
-                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Skill</th>
-                                <th style="padding: 8px; border: 1px solid #ddd; text-align: center; width: 100px;">Level</th>
-                                <th style="padding: 8px; border: 1px solid #ddd; text-align: center; width: 100px;">Critical</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.dataAnalysisRating > 1 ? `<tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Data Analysis</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.dataAnalysisRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.dataAnalysisCritical ? 'Yes' : 'No'}</td>
-                            </tr>` : ''}
-                            ${data.codingRating > 1 ? `<tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Programming/Development</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.codingRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.codingCritical ? 'Yes' : 'No'}</td>
-                            </tr>` : ''}
-                            ${data.riskToolsRating > 1 ? `<tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Risk & Fraud Management</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.riskToolsRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.riskToolsCritical ? 'Yes' : 'No'}</td>
-                            </tr>` : ''}
-                            ${data.paymentsRating > 1 ? `<tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Payments Systems</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.paymentsRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.paymentsCritical ? 'Yes' : 'No'}</td>
-                            </tr>` : ''}
-                            ${data.reportingRating > 1 ? `<tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Reporting & Visualization</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.reportingRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.reportingCritical ? 'Yes' : 'No'}</td>
-                            </tr>` : ''}
-                        </tbody>
-                    </table>
-
-                    <h4 style="color: #333; margin-top: 20px;">4.2 Behavioral Traits</h4>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-                        <thead>
-                            <tr style="background: #f5f5f5;">
-                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Trait</th>
-                                <th style="padding: 8px; border: 1px solid #ddd; text-align: center; width: 80px;">Rating</th>
-                                <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Context</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Problem-Solving</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.problemSolvingRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${data.problemSolvingWhy || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Teamwork</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.teamworkRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${data.teamworkWhy || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Stress Management</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.stressRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${data.stressWhy || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;">Integrity & Ethics</td>
-                                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${data.integrityRating}/5</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${data.integrityWhy || '-'}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">5. PERFORMANCE MEASUREMENT</h3>
-                    
-                    <h4 style="color: #333; margin-top: 20px;">5.1 Key Performance Indicators</h4>
-                    <ol style="line-height: 1.8;">
-                        <li>${data.kpi1 || 'N/A'}</li>
-                        <li>${data.kpi2 || 'N/A'}</li>
-                        <li>${data.kpi3 || 'N/A'}</li>
-                    </ol>
-
-                    <h4 style="color: #333; margin-top: 20px;">5.2 Risk Analysis</h4>
-                    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0;">
-                        <strong>Major Risks:</strong><br>
-                        ${(data.risks || 'Not specified').replace(/\n/g, '<br>')}
-                    </div>
-
-                    <h4 style="color: #333; margin-top: 20px;">5.3 Tools & Resources</h4>
-                    <p><strong>Daily Tools:</strong> ${data.dailyTools || 'Not specified'}</p>
-                    <p><strong>Work Guides:</strong> ${data.workGuide1 || ''}, ${data.workGuide2 || ''}</p>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">6. DECISION-MAKING & AUTONOMY</h3>
-                    <p><strong>Autonomy Level:</strong> ${data.autonomyDescription || 'Not specified'}</p>
-                    
-                    <p style="margin-top: 15px;"><strong>Decision Types:</strong></p>
-                    <ul style="line-height: 1.8;">
-                        ${data.decisionOperational ? '<li>Operational (daily tasks)</li>' : ''}
-                        ${data.decisionTactical ? '<li>Tactical (process improvements)</li>' : ''}
-                        ${data.decisionStrategic ? '<li>Strategic (budget/planning)</li>' : ''}
-                        ${data.decisionFinancial ? '<li>Financial (approvals)</li>' : ''}
-                        ${data.decisionPeople ? '<li>People-related (hiring/assignments)</li>' : ''}
-                        ${data.decisionRegulatory ? '<li>Regulatory (compliance)</li>' : ''}
-                        ${data.decisionOther ? `<li>Other: ${data.decisionOther}</li>` : ''}
-                    </ul>
-
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">7. ORGANIZATIONAL CONTEXT</h3>
-                    <p><strong>Direct Reports:</strong> ${data.directReports || 'None'}</p>
-                    <p><strong>Key Stakeholders:</strong> ${data.stakeholder1 || ''}, ${data.stakeholder2 || ''}</p>
-                    <p><strong>Reporting Structure:</strong> ${data.orgStructure || 'Not specified'}</p>
-
-                    ${data.finalComments ? `
-                    <h3 style="color: #0d5c5c; border-bottom: 2px solid #c9a962; padding-bottom: 10px;">8. ADDITIONAL COMMENTS</h3>
-                    <p>${data.finalComments}</p>
-                    ` : ''}
-
-                    <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #0d5c5c; font-size: 12px; color: #666; text-align: center;">
-                        <p>This document was generated by the Malyom Job Analysis System</p>
-                        <p>Confidential - For authorized personnel only</p>
-                        <p>Questions? Contact: connect@malyom.com</p>
-                    </div>
-                </div>
-            `;
-        }
-
-        function previewDocument() {
-            const content = generateDocumentContent();
-            document.getElementById('previewDocument').innerHTML = content;
-            document.getElementById('previewModal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closePreview() {
-            document.getElementById('previewModal').style.display = 'none';
-            document.body.style.overflow = 'auto';
+            return {
+                metadata: {
+                    submittedAt: new Date().toISOString(),
+                    submittedBy: data.teamLeadName,
+                    submitterEmail: data.teamLeadEmail,
+                    recipientEmail: 'fredrickade469@gmail.com',
+                    formVersion: '2.0'
+                },
+                basicInfo: {
+                    teamLeadName: data.teamLeadName,
+                    teamLeadEmail: data.teamLeadEmail,
+                    jobTitle: data.jobTitle,
+                    department: data.department,
+                    analysisDate: data.analysisDate,
+                    jobFamily: jobFamilyNames[data.selectedJobFamily] || data.jobFamilyOther || 'Not specified'
+                },
+                jobBasics: {
+                    jobGoal: data.jobGoal,
+                    tasks: tasks,
+                    taskPercentageTotal: taskTotal
+                },
+                qualifications: {
+                    education: {
+                        jobSpecific: data.eduJobSpecific || '',
+                        rating: parseInt(data.eduRating),
+                        required: data.eduMustHave || false
+                    },
+                    fieldOfStudy: {
+                        jobSpecific: data.fieldJobSpecific || '',
+                        rating: parseInt(data.fieldRating),
+                        required: data.fieldMustHave || false
+                    },
+                    yearsExperience: {
+                        years: parseInt(data.yearsExperience) || 0,
+                        jobSpecific: data.expJobSpecific || '',
+                        rating: parseInt(data.expRating),
+                        required: data.expMustHave || false
+                    },
+                    fintechExperience: {
+                        years: parseInt(data.fintechYears) || 0,
+                        jobSpecific: data.fintechJobSpecific || '',
+                        rating: parseInt(data.fintechRating),
+                        required: data.fintechMustHave || false
+                    },
+                    technicalQualifications: {
+                        jobSpecific: data.techQualJobSpecific || '',
+                        rating: parseInt(data.techQualRating),
+                        required: data.techQualMustHave || false
+                    },
+                    notes: data.qualificationsNotes || ''
+                },
+                certifications: {
+                    cloud: { 
+                        jobSpecific: data.cloudCertJobSpecific || '',
+                        rating: parseInt(data.cloudCertRating), 
+                        required: data.cloudCertRequired || false 
+                    },
+                    security: { 
+                        jobSpecific: data.securityCertJobSpecific || '',
+                        rating: parseInt(data.securityCertRating), 
+                        required: data.securityCertRequired || false 
+                    },
+                    projectManagement: { 
+                        jobSpecific: data.pmCertJobSpecific || '',
+                        rating: parseInt(data.pmCertRating), 
+                        required: data.pmCertRequired || false 
+                    },
+                    regulatory: { 
+                        jobSpecific: data.regulatoryCertJobSpecific || '',
+                        rating: parseInt(data.regulatoryCertRating), 
+                        required: data.regulatoryCertRequired || false 
+                    },
+                    other: { 
+                        name: data.otherCertName || '',
+                        jobSpecific: data.otherCertJobSpecific || '',
+                        rating: parseInt(data.otherCertRating), 
+                        required: data.otherCertRequired || false 
+                    },
+                    notes: data.certificationsNotes || ''
+                },
+                functionalSkills: {
+                    dataAnalysis: { 
+                        jobSpecific: data.dataAnalysisJobSpecific || '',
+                        rating: parseInt(data.dataAnalysisRating), 
+                        critical: data.dataAnalysisCritical || false 
+                    },
+                    coding: { 
+                        jobSpecific: data.codingJobSpecific || '',
+                        rating: parseInt(data.codingRating), 
+                        critical: data.codingCritical || false 
+                    },
+                    riskManagement: { 
+                        jobSpecific: data.riskToolsJobSpecific || '',
+                        rating: parseInt(data.riskToolsRating), 
+                        critical: data.riskToolsCritical || false 
+                    },
+                    payments: { 
+                        jobSpecific: data.paymentsJobSpecific || '',
+                        rating: parseInt(data.paymentsRating), 
+                        critical: data.paymentsCritical || false 
+                    },
+                    reporting: { 
+                        jobSpecific: data.reportingJobSpecific || '',
+                        rating: parseInt(data.reportingRating), 
+                        critical: data.reportingCritical || false 
+                    },
+                    customSkills: [
+                        { 
+                            name: data.customSkill1 || '',
+                            jobSpecific: data.customSkill1JobSpecific || '',
+                            rating: parseInt(data.customSkill1Rating), 
+                            critical: data.customSkill1Critical || false 
+                        },
+                        { 
+                            name: data.customSkill2 || '',
+                            jobSpecific: data.customSkill2JobSpecific || '',
+                            rating: parseInt(data.customSkill2Rating), 
+                            critical: data.customSkill2Critical || false 
+                        },
+                        { 
+                            name: data.customSkill3 || '',
+                            jobSpecific: data.customSkill3JobSpecific || '',
+                            rating: parseInt(data.customSkill3Rating), 
+                            critical: data.customSkill3Critical || false 
+                        },
+                        { 
+                            name: data.customSkill4 || '',
+                            jobSpecific: data.customSkill4JobSpecific || '',
+                            rating: parseInt(data.customSkill4Rating), 
+                            critical: data.customSkill4Critical || false 
+                        },
+                        { 
+                            name: data.customSkill5 || '',
+                            jobSpecific: data.customSkill5JobSpecific || '',
+                            rating: parseInt(data.customSkill5Rating), 
+                            critical: data.customSkill5Critical || false 
+                        }
+                    ].filter(s => s.name),
+                    notes: data.skillsNotes || ''
+                },
+                behavioralTraits: {
+                    problemSolving: { rating: parseInt(data.problemSolvingRating), context: data.problemSolvingWhy || '' },
+                    teamwork: { rating: parseInt(data.teamworkRating), context: data.teamworkWhy || '' },
+                    stressManagement: { rating: parseInt(data.stressRating), context: data.stressWhy || '' },
+                    integrity: { rating: parseInt(data.integrityRating), context: data.integrityWhy || '' },
+                    learningAgility: { rating: parseInt(data.learningRating), context: data.learningWhy || '' },
+                    leadership: { rating: parseInt(data.leadershipRating), context: data.leadershipWhy || '' },
+                    custom: { name: data.customTrait || '', rating: parseInt(data.customTraitRating), context: data.customTraitWhy || '' }
+                },
+                performance: {
+                    kpis: [data.kpi1, data.kpi2, data.kpi3].filter(k => k),
+                    risks: data.risks || '',
+                    dailyTools: data.dailyTools || '',
+                    workGuides: {
+                        companyPolicy: data.workGuide1Check || false,
+                        employeeHandbook: data.workGuide2Check || false,
+                        others: [data.workGuide3, data.workGuide4, data.workGuide5, data.workGuide6, data.workGuide7].filter(g => g)
+                    }
+                },
+                decisionMaking: {
+                    autonomyDescription: data.autonomyDescription || '',
+                    decisionTypes: {
+                        operational: data.decisionOperational || false,
+                        tactical: data.decisionTactical || false,
+                        strategic: data.decisionStrategic || false,
+                        financial: data.decisionFinancial || false,
+                        people: data.decisionPeople || false,
+                        regulatory: data.decisionRegulatory || false,
+                        other: data.decisionOther || ''
+                    }
+                },
+                organizationalContext: {
+                    directReports: data.directReports || 'None',
+                    stakeholders: [data.stakeholder1, data.stakeholder2, data.stakeholder3, data.stakeholder4, data.stakeholder5].filter(s => s),
+                    structure: data.orgStructure || '',
+                    organogramFile: uploadedFile ? uploadedFile.name : null
+                },
+                additionalComments: data.finalComments || ''
+            };
         }
 
         function submitForm() {
-            if (!validateCurrentSection()) return;
+            // Final validation of all sections
+            let allValid = true;
+            for (let i = 0; i < totalSections - 1; i++) {
+                if (!validateSection(i)) {
+                    allValid = false;
+                    // Go to first invalid section
+                    showSection(i);
+                    return;
+                }
+            }
 
-            const loading = document.getElementById('loadingIndicator');
-            const success = document.getElementById('successMessage');
-            const content = generateDocumentContent();
-            
-            // Show loading
-            loading.style.display = 'block';
-            
-            // Prepare email content
-            const form = document.getElementById('jobAnalysisForm');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            const emailSubject = `Job Analysis: ${data.jobTitle} - ${data.subordinateName}`;
-            const emailBody = `
-Job Analysis Submission
+            if (!allValid) return;
 
-Position: ${data.jobTitle}
-Department: ${data.department}
-Incumbent: ${data.subordinateName}
-Analyzed by: ${data.teamLeadName}
-Date: ${data.analysisDate}
+            // Show loading overlay
+            document.getElementById('loadingOverlay').classList.add('show');
 
----
-Full HTML Report attached below.
-            `;
+            // Generate formatted data
+            const submissionData = generateFormattedData();
 
-            // Simulate submission (in production, this would send to backend)
+            // Log the data (in production, this would be sent to backend)
+            console.log('=== JOB ANALYSIS SUBMISSION ===');
+            console.log('Recipient: fredrickade469@gmail.com');
+            console.log('Timestamp:', new Date().toISOString());
+            console.log('Data:', JSON.stringify(submissionData, null, 2));
+            console.log('================================');
+
+            // Simulate API call
             setTimeout(() => {
-                loading.style.display = 'none';
-                success.style.display = 'block';
+                // Hide loading
+                document.getElementById('loadingOverlay').classList.remove('show');
                 
-                // Create mailto link with formatted content
-                const mailtoLink = `mailto:fredrickade469@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+                // Show success modal
+                document.getElementById('successModal').classList.add('show');
                 
-                // Open email client
-                window.open(mailtoLink, '_blank');
+                // Reset form after successful submission
+                resetForm();
                 
-                // Also log the HTML content to console for copy-paste
-                console.log('=== JOB ANALYSIS HTML CONTENT ===');
-                console.log(content);
-                console.log('=================================');
-                
-            }, 1500);
+            }, 2000);
+        }
+
+        function resetForm() {
+            const form = document.getElementById('jobAnalysisForm');
+            form.reset();
+            
+            // Reset visual states
+            document.querySelectorAll('.job-family-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById('selectedJobFamily').value = '';
+            document.getElementById('percentageTotal').textContent = 'Total: 0%';
+            document.getElementById('percentageTotal').style.color = 'var(--primary)';
+            
+            // Reset file upload
+            uploadedFile = null;
+            document.getElementById('fileName').textContent = '';
+            const fileLabel = document.getElementById('fileUploadLabel');
+            fileLabel.classList.remove('has-file');
+            fileLabel.innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Click to upload organogram (Image, PDF, or Document)</span>
+            `;
+            
+            // Reset all validation states
+            document.querySelectorAll('input, textarea, select').forEach(field => {
+                field.classList.remove('error', 'valid');
+            });
+            document.querySelectorAll('.error-message').forEach(msg => {
+                msg.classList.remove('show');
+            });
+            
+            // Reset to first section
+            currentSection = 0;
+            updateProgress();
+            showSection(0);
+            
+            // Reset date to today
+            document.getElementById('analysisDate').valueAsDate = new Date();
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('show');
         }
 
         // Close modal on outside click
-        document.getElementById('previewModal').addEventListener('click', function(e) {
+        document.getElementById('successModal').addEventListener('click', function(e) {
             if (e.target === this) {
-                closePreview();
+                closeSuccessModal();
             }
         });
 
-        // Initialize date field with today's date
-        document.addEventListener('DOMContentLoaded', function() {
-            const dateField = document.querySelector('input[name="analysisDate"]');
-            if (dateField) {
-                dateField.valueAsDate = new Date();
+        // Allow Enter key to proceed in form fields (except textarea)
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                const section = e.target.closest('.form-section');
+                if (section) {
+                    const sectionIndex = parseInt(section.dataset.section);
+                    const nextBtn = section.querySelector('.btn-primary');
+                    if (nextBtn) {
+                        nextBtn.click();
+                    }
+                }
             }
         });
     </script>
